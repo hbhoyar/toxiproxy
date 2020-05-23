@@ -20,7 +20,7 @@ func WithServer(t *testing.T, f func(string)) {
 	// way to shut it down between each test run.
 	if testServer == nil {
 		testServer = toxiproxy.NewServer()
-		go testServer.Listen("localhost", "8475")
+		go testServer.Listen("localhost", "8475", nil)
 
 		// Allow server to start. There's no clean way to know when it listens.
 		time.Sleep(50 * time.Millisecond)

@@ -57,7 +57,7 @@ func StopBrowsersMiddleware(h http.Handler) http.Handler {
 	})
 }
 
-func (server *ApiServer) Listen(host string, port string) {
+func (server *ApiServer) Listen(host string, port string, callback func()) {
 	r := mux.NewRouter()
 	r.HandleFunc("/reset", server.ResetState).Methods("POST")
 	r.HandleFunc("/proxies", server.ProxyIndex).Methods("GET")
@@ -76,15 +76,24 @@ func (server *ApiServer) Listen(host string, port string) {
 
 	http.Handle("/", StopBrowsersMiddleware(r))
 
+	l, err := net.Listen("tcp", net.JoinHostPort(host, port))
+	if err != nil {
+		log.Fatal("Listen: ", err)
+	}
+
 	logrus.WithFields(logrus.Fields{
 		"host":    host,
 		"port":    port,
 		"version": Version,
 	}).Info("API HTTP server starting")
 
-	err := http.ListenAndServe(net.JoinHostPort(host, port), nil)
+	if callback != nil {
+		go callback()
+	}
+
+	err = http.Serve(l, nil)
 	if err != nil {
-		log.Fatal("ListenAndServe: ", err)
+		log.Fatal("Serve: ", err)
 	}
 }
 

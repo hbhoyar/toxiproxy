@@ -38,5 +38,5 @@ func main() {
 		os.Exit(0)
 	}()
 
-	server.Listen(host, port)
+	server.Listen(host, port, nil)
 }
